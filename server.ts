@@ -8,6 +8,4 @@ app.get("/connect", (req, res) => {
     res.json({});
 });
 
-app.listen(80, "192.168.0.123", () =>
-    console.log(`Server has been succesfully started!`)
-);
+app.listen(80, "192.168.0.123", () => console.log(`Server has been succesfully started`));

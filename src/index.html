@@ -13,9 +13,8 @@
     <div class="container">
 
         <h2> Token balance:<span id="tokenBalance"> - </span></h2>
-        <div id="stakes">
-
-        </div>
+         <h2> Total staked:<span id="totalStaked"> - </span></h2>
+         <h2> Daily distribution:<span id="dailyDistribution"> - </span></h2>
 
         <div style="display: flex; justify-content: center; margin-top: 25px;">
             <button id="connectBtn" style="margin-right: 10px;" class="btn btn-sm btn-outline-primary">
@@ -32,7 +31,9 @@
             </div>
             <button id="approveBtn" class="btn btn-sm btn-outline-primary">approve</button>
             <button id="stakeBtn" class="btn btn-sm btn-outline-primary">stake</button>
-             <button id="claimBtn" class="btn btn-sm btn-outline-primary">claim rewards</button>
+            <button id="unstakeBtn" class="btn btn-sm btn-outline-primary">unstake</button>
+            <button id="claimBtn" class="btn btn-sm btn-outline-primary">claim rewards <span id="avialableReward">-</span></button>
+            <h5 class="ml-1">All rewards: <span id="allRewards">-</span></h5>
         </div>
 
 

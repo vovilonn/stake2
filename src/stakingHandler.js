@@ -2,6 +2,16 @@ import { ethers } from "ethers";
 import { store } from "./redux/store";
 import config from "./config.json";
 
+export async function getDailyDistribution() {
+    const state = store.getState();
+    const contract = state.contract.instance.staking;
+    try {
+        return await contract.rewardTokensByDay();
+    } catch (err) {
+        alert(err);
+    }
+}
+
 export async function getStakeDataById(id) {
     const state = store.getState();
     const bigNumberValue = ethers.BigNumber.from(id.toString());
@@ -18,21 +28,18 @@ export async function getStakesCount() {
     const contract = state.contract.instance.staking;
     try {
         const stakesCount = await contract.getCountStake(state.contract.user.wallet);
+        console.log("getStakesCount");
         return stakesCount.toNumber();
     } catch (err) {
         if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
             alert("Need to approve");
         } else {
-            if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
-                alert("Need to approve");
-            } else {
-                alert(err);
-            }
+            alert(err);
         }
     }
 }
 
-export async function getAllStakesData() {
+async function getAllStakesData() {
     const stakes = [];
     try {
         const stakesCount = await getStakesCount();
@@ -47,27 +54,44 @@ export async function getAllStakesData() {
     }
 }
 
-export async function getAvialableRewardById(id) {
-    const state = store.getState();
-    const bigNumberValue = ethers.BigNumber.from(id.toString());
-    const shiftTime = ethers.BigNumber.from(864000);
-    const contract = state.contract.instance.staking;
+export async function getTotalStakedValue() {
     try {
-        return await contract.calcRewardByIndex(config.stakingContractAddress, bigNumberValue, shiftTime);
+        const stakes = await getAllStakesData();
+        let weiTotalStaked = ethers.BigNumber.from(0);
+
+        stakes.forEach((stake) => {
+            weiTotalStaked = weiTotalStaked.add(stake._amount.toString());
+            console.log("stake", stake._amount);
+        });
+        return +ethers.utils.formatEther(weiTotalStaked.toString());
     } catch (err) {
         alert(err);
     }
 }
 
-export async function getAllRewards() {
-    const rewards = [];
+export async function getAvialableRewardById(id) {
+    const state = store.getState();
+    const bigNumberValue = ethers.BigNumber.from(id.toString());
+    const shiftTime = ethers.BigNumber.from(0);
+    const contract = state.contract.instance.staking;
+    try {
+        return await contract.calcRewardByIndex(state.contract.user.wallet, bigNumberValue, shiftTime);
+    } catch (err) {
+        alert(err);
+    }
+}
+
+export async function getTotalRewardsValue() {
+    let totalRewards = ethers.BigNumber.from(0);
     try {
         const stakesCount = await getStakesCount();
         for (let i = 0; i < stakesCount; i++) {
-            const reward = await getAvialableRewardById(i);
-            rewards.push(reward);
+            const { reward } = await getAvialableRewardById(i);
+            console.log(reward);
+            totalRewards = totalRewards.add(reward.toString());
         }
-        return rewards;
+        console.log("TOTAL REWARDS: ", totalRewards.toString());
+        return totalRewards.toString();
     } catch (err) {
         alert(err);
     }
@@ -77,7 +101,7 @@ export async function stake(amount) {
     const state = store.getState();
     const contract = state.contract.instance.staking;
     console.log("STAKE wallet", state.contract.user.wallet);
-    const bigNumberValue = ethers.BigNumber.from(amount.toString());
+    const bigNumberValue = ethers.utils.parseEther(amount.toString());
     try {
         return await contract.stake(state.contract.user.wallet, bigNumberValue);
     } catch (err) {
@@ -95,18 +119,12 @@ export async function claimRewards(id) {
     }
 }
 
-export async function unStake(id) {
+export async function unStake() {
     const state = store.getState();
     const contract = state.contract.instance.staking;
     console.log("UNSTAKE", state.contract.user.wallet);
-    const bigNumberValue = ethers.BigNumber.from(id.toString());
     try {
-        const avialableToUnstake = await contract.isPassedTime(state.contract.user.wallet, bigNumberValue);
-        if (avialableToUnstake) {
-            return await contract.unStake(config.mainWallet);
-        } else {
-            alert("Unable to unstake!");
-        }
+        return await contract.unStake(config.mainWallet);
     } catch (err) {
         alert(err);
     }
