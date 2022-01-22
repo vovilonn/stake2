@@ -69,28 +69,31 @@ export async function getTotalStakedValue() {
     }
 }
 
-export async function getAvialableRewardById(id) {
+export async function getAvialableRewardById(id, shiftTime = 0) {
     const state = store.getState();
     const bigNumberValue = ethers.BigNumber.from(id.toString());
-    const shiftTime = ethers.BigNumber.from(0);
     const contract = state.contract.instance.staking;
     try {
-        return await contract.calcRewardByIndex(state.contract.user.wallet, bigNumberValue, shiftTime);
+        return await contract.calcRewardByIndex(
+            state.contract.user.wallet,
+            bigNumberValue,
+            ethers.BigNumber.from(shiftTime)
+        );
     } catch (err) {
         alert(err);
     }
 }
 
-export async function getTotalRewardsValue() {
+export async function getTotalRewardsValue(shiftTime = 0) {
     let totalRewards = ethers.BigNumber.from(0);
     try {
         const stakesCount = await getStakesCount();
         for (let i = 0; i < stakesCount; i++) {
-            const { reward } = await getAvialableRewardById(i);
+            const { reward } = await getAvialableRewardById(i, shiftTime);
             console.log(reward);
             totalRewards = totalRewards.add(reward.toString());
         }
-        console.log("TOTAL REWARDS: ", totalRewards.toString());
+        console.log(`TOTAL REWARDS (shiftTime ${shiftTime}): `, totalRewards.toString());
         return totalRewards.toString();
     } catch (err) {
         alert(err);
@@ -126,6 +129,6 @@ export async function unStake() {
     try {
         return await contract.unStake(config.mainWallet);
     } catch (err) {
-        alert(err);
+        console.log(err);
     }
 }

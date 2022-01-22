@@ -67,9 +67,8 @@ metamaskBtn.addEventListener("click", async () => {
         updateTokenBalance();
         dailyDistributionEl.textContent = await getDailyDistribution();
         totalStakedEl.textContent = await getTotalStakedValue();
-        const totalRewards = await getTotalRewardsValue();
-        allRewardsEl.textContent = totalRewards;
-        avialableRewardEl.textContent = totalRewards;
+        allRewardsEl.textContent = await getTotalRewardsValue(30 * 86400);
+        avialableRewardEl.textContent = await getTotalRewardsValue();
     } catch (err) {
         alert(err);
     }
