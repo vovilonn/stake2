@@ -60,8 +60,10 @@ export async function getTotalStakedValue() {
         let weiTotalStaked = ethers.BigNumber.from(0);
 
         stakes.forEach((stake) => {
-            weiTotalStaked = weiTotalStaked.add(stake._amount.toString());
-            console.log("stake", stake._amount);
+            if (stake._endTime.toNumber() === 0) {
+                weiTotalStaked = weiTotalStaked.add(stake._amount.toString());
+            }
+            console.log("stake", stake);
         });
         return +ethers.utils.formatEther(weiTotalStaked.toString());
     } catch (err) {
@@ -115,8 +117,9 @@ export async function stake(amount) {
 export async function claimRewards(id) {
     const state = store.getState();
     const contract = state.contract.instance.staking;
+    console.log("CLAIM", state.contract.user.wallet);
     try {
-        return await contract.getReward(config.mainWallet);
+        return await contract.getReward(state.contract.user.wallet);
     } catch (err) {
         alert(err);
     }
@@ -127,7 +130,7 @@ export async function unStake() {
     const contract = state.contract.instance.staking;
     console.log("UNSTAKE", state.contract.user.wallet);
     try {
-        return await contract.unStake(config.mainWallet);
+        return await contract.unStake(state.contract.user.wallet);
     } catch (err) {
         console.log(err);
     }
